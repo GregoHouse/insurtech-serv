@@ -4,19 +4,22 @@
   "description": "insurtech backend",
   "main": "src/index.js",
   "scripts": {
-    "dev": "serverless offline -s dev"
+    "dev": "serverless offline start -s dev"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "typescript": "^5.5.4",
+    "@serverless/typescript": "^3.30.1",
     "@types/aws-lambda": "^8.10.119",
+    "@types/node": "^22.0.0",
+    "esbuild": "^0.17.19",
     "serverless": "^3.34.0",
     "serverless-esbuild": "^1.46.0",
-    "esbuild": "^0.17.19",
     "serverless-offline": "^12.0.4",
-    "@serverless/typescript": "^3.30.1"
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.622.0"
   }
 }

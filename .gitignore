@@ -42,3 +42,4 @@ yarn.lock
 
 # serverless
 .esbuild
+.local-infra/docker

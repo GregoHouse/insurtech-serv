@@ -2,8 +2,18 @@
 service: serverless-typescript-template
 
 plugins:
-  - serverless-esbuild # used for compiling/packaging the Typescript code
-  - serverless-offline # used for local execution
+  - serverless-esbuild
+  - serverless-offline
+
+custom:
+  serverless-dynamodb:
+    stages:
+      - dev
+    start:
+      host: localhost
+      port: 8000
+      inMemory: true
+      migrate: true
 
 provider:
   name: aws
@@ -23,8 +33,8 @@ provider:
             - Fn::GetAtt: [UsersTable, Arn]
   region: eu-west-1
   stage: ${opt:stage}
-  timeout: 30   # repository wide Lambda timeout
-  environment:  # repository wide Lambda env variables
+  timeout: 30
+  environment:
     STAGE: ${self:provider.stage}
     USERS_TABLE_NAME: users
 

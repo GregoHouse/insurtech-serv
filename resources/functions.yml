@@ -1,0 +1,6 @@
+test:
+  handler: ./src/lambdas/test.handler
+  events:
+    - httpApi:
+        path: /api/test
+        method: GET

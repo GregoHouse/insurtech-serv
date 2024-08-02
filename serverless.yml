@@ -1,0 +1,36 @@
+# ./serverless.yml
+service: serverless-typescript-template
+
+plugins:
+  - serverless-esbuild # used for compiling/packaging the Typescript code
+  - serverless-offline # used for local execution
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - Fn::GetAtt: [UsersTable, Arn]
+  region: eu-west-1
+  stage: ${opt:stage}
+  timeout: 30   # repository wide Lambda timeout
+  environment:  # repository wide Lambda env variables
+    STAGE: ${self:provider.stage}
+    USERS_TABLE_NAME: users
+
+functions:
+  - ${file(resources/functions.yml)}
+
+resources:
+  Resources:
+    UsersTable: ${file(resources/dynamo-db.yml):UsersTable}

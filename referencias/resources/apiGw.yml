@@ -1,0 +1,43 @@
+ApiGatewayRestApi:
+  Type: AWS::ApiGateway::RestApi
+  Properties:
+    Name: ${self:service}-${sls:stage}-api
+    Description: API Gateway ${self:service} ${sls:stage}
+    ## for privage ApiGateway uncomment between 7 and 34 lines and set VPC_ENDPOINT in .env.dev
+    # EndpointConfiguration:
+    #   Types:
+    #     - PRIVATE
+    #   VpcEndpointIds:
+    #     - ${env:VPC_ENDPOINT}
+    # Policy:
+    #   {
+    #     'Version': '2012-10-17',
+    #     'Statement':
+    #       [
+    #         {
+    #           'Effect': 'Deny',
+    #           'Principal': '*',
+    #           'Action': 'execute-api:Invoke',
+    #           'Resource': 'execute-api:/*',
+    #           'Condition':
+    #             {
+    #               'StringNotEquals': { 'aws:sourceVpce': ${env:VPC_ENDPOINT} },
+    #             },
+    #         },
+    #         {
+    #           'Effect': 'Allow',
+    #           'Principal': '*',
+    #           'Action': 'execute-api:Invoke',
+    #           'Resource': 'execute-api:/*',
+    #         },
+    #       ],
+    #   }
+
+ApiGatewayBasePathMapping:
+  Type: AWS::ApiGateway::BasePathMapping
+  DependsOn: 'ApiGatewayDeployment${sls:instanceId}'
+  Properties:    
+    DomainName: ${env:CUSTOM_DOMAIN_NAME}
+    RestApiId: !Ref ApiGatewayRestApi
+    Stage: ${sls:stage}
+    BasePath: ${self:service}

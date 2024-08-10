@@ -1,0 +1,136 @@
+service: checkout-config-api
+
+frameworkVersion: '3'
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  logRetentionInDays: 7 # default is 30 days
+  architecture: arm64
+  stage: ${opt:stage, 'develop'}
+  region: ${opt:region, env:REGION}
+  stackTags:
+    domain-name: 'domain:default/payments-checkout'
+    system-name: 'system:default/checkout'
+    vertical-name: 'financial'
+    squad-name: 'checkout'
+    shared-resource: false
+    gitlab-id: 0 # Project ID in gitlab repository
+    environment: ${self:custom.environments.${sls:stage}} # TODO: Change when stage is fixed by wiru/pipeline
+    provider: aws
+    lifecycle: 'production'
+  environment:
+    NODE_ENV: ${self:custom.nodeEnvEnvironments.${sls:stage}}
+    ENVIRONMENT: ${self:custom.environments.${sls:stage}}
+    NODE_CONFIG_ENV: ${self:custom.environments.${sls:stage}}
+    DD_ENV: ${self:custom.environments.${sls:stage}}
+    SERVICE_ENVIRONMENT: ${self:custom.environments.${sls:stage}}
+    DEFAULT_CONSUMER_ID: 'NOT_INFORMED'
+    TABLE_NAME: checkout-config-api
+    #Inject npm vars into serverless environment
+    npm_package_name: ${file(package.json):name}
+    # Swagger/OpenAPI version reference if applicable
+    npm_package_apiReference: ${file(package.json):apiReference, null}
+    npm_package_description: ${file(package.json):description}
+    npm_package_version: ${file(package.json):version}
+  tracing:
+    lambda: true
+  deploymentBucket:
+    name: ${self:custom.variables.bucketName}
+    serverSideEncryption: AES256
+  apiGateway:
+    restApiId:
+      Ref: ApiGatewayRestApi
+    restApiRootResourceId:
+      Fn::GetAtt: [ApiGatewayRestApi, RootResourceId]
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:deleteItem
+            - dynamodb:Scan
+          Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${env:TABLE_NAME}'
+
+package:
+  individually: true
+
+functions:
+  - ${file(resources/functions.yml)}
+
+plugins:
+  - serverless-webpack
+  #- serverless-esbuild
+  - serverless-offline
+  - serverless-dotenv-plugin
+  - serverless-deployment-bucket
+  - "@nx-sse/resource-tagging-plugin"
+  #- '@nx-sse/vault-extension-plugin'
+
+custom:
+  serverless-offline:
+    noPrependStageInUrl: true
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+    packager: 'npm'
+  variables:
+    bucketName: ${self:service}-${sls:stage}-bucket
+  # esbuild:
+  #   bundle: true
+  #   minify: true
+  #   sourcemap: true
+  #   packager: npm
+  #   platform: node
+  #   watch:
+  #     pattern: ['./index.ts', 'src/**/*.ts']
+  #     ignore: ['.serverless/**/*', 'build', '.history', 'coverage']
+  deploymentBucket:
+      blockPublicAccess: true
+      policy:
+        Id: ${self:custom.variables.bucketName}-policy
+        Version: '2012-10-17'
+        Statement:
+        - Sid: AllowSSLRequestsOnly
+          Action: s3:*
+          Effect: Deny
+          Resource:
+          - arn:aws:s3:::${self:custom.variables.bucketName}
+          - arn:aws:s3:::${self:custom.variables.bucketName}/*
+          Condition:
+            Bool:
+              aws:SecureTransport: 'false'
+          Principal: "*"
+  environments:
+    stubs: 'dev'
+    real: 'dev'
+    develop: 'dev'
+    testing: 'tst'
+    staging: 'stg'
+    prodblue: 'prd'
+  nodeEnvEnvironments:
+    stubs: 'development'
+    real: 'development'
+    develop: 'development'
+    testing: 'development'
+    staging: 'production'
+    prodblue: 'production'
+  # vaultExtension:
+  #   include:
+  #     - getProduct
+  #   stackSecret: true
+
+resources:
+  Resources:
+    RepositoryTable: ${file(resources/dynamoDB.yml):RepositoryTable}
+    ApiGatewayRestApi: ${file(resources/apiGw.yml):ApiGatewayRestApi}
+    ApiGatewayBasePathMapping: ${file(resources/apiGw.yml):ApiGatewayBasePathMapping}
+    CentralizedAuthorizer: ${file(resources/authorizer.yml):CentralizedAuthorizer}
+

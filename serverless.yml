@@ -38,6 +38,9 @@ provider:
     STAGE: ${self:provider.stage}
     USERS_TABLE_NAME: users
 
+package:
+  individually: true
+
 functions:
   - ${file(resources/functions.yml)}
 

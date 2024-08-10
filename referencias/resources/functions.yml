@@ -1,0 +1,64 @@
+getProduct:
+  handler: ./src/lambdas/getProduct.handler
+  events:
+    - http:
+        method: GET
+        path: /product/{id}
+        authorizer:
+          type: "TOKEN"
+          authorizerId:
+            Ref: CentralizedAuthorizer
+  memorySize: ${env:MEMORY_SIZE}
+  provisionedConcurrency: ${env:PROVISIONED_CONCURRENCY}
+
+deleteProduct:
+  handler: ./src/lambdas/deleteProduct.handler
+  events:
+    - http:
+        method: DELETE
+        path: /product/{id}
+        authorizer:
+          type: "TOKEN"
+          authorizerId:
+            Ref: CentralizedAuthorizer
+  memorySize: ${env:MEMORY_SIZE}
+  provisionedConcurrency: ${env:PROVISIONED_CONCURRENCY}
+
+getProducts:
+  handler: ./src/lambdas/getProducts.handler
+  events:
+    - http:
+        method: GET
+        path: /product
+        authorizer:
+          type: "TOKEN"
+          authorizerId:
+            Ref: CentralizedAuthorizer
+  memorySize: ${env:MEMORY_SIZE}
+  provisionedConcurrency: ${env:PROVISIONED_CONCURRENCY}
+
+putProduct:
+  handler: ./src/lambdas/putProduct.handler
+  events:
+    - http:
+        method: PUT
+        path: /product
+        authorizer:
+          type: "TOKEN"
+          authorizerId:
+            Ref: CentralizedAuthorizer
+  memorySize: ${env:MEMORY_SIZE}
+  provisionedConcurrency: ${env:PROVISIONED_CONCURRENCY}
+
+postProduct:
+  handler: ./src/lambdas/postProduct.handler
+  events:
+    - http:
+        method: POST
+        path: /product
+        authorizer:
+          type: "TOKEN"
+          authorizerId:
+            Ref: CentralizedAuthorizer
+  memorySize: ${env:MEMORY_SIZE}
+  provisionedConcurrency: ${env:PROVISIONED_CONCURRENCY}

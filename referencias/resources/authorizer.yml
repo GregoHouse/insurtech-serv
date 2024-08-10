@@ -1,0 +1,10 @@
+CentralizedAuthorizer:
+  Type: AWS::ApiGateway::Authorizer
+  Properties:
+    Name: !Join ['_', ['centralized_auth', '${sls:stage}']]
+    AuthorizerUri: 'arn:aws:apigateway:${aws:region}:lambda:path/2015-03-31/functions/${env:LAMBDA_AUTHORIZER}/invocations'
+    AuthorizerResultTtlInSeconds: 300
+    IdentityValidationExpression: '^Bearer [-0-9a-zA-Z\._]*$'
+    RestApiId: !Ref ApiGatewayRestApi
+    Type: 'TOKEN'
+    IdentitySource: 'method.request.header.Authorization'

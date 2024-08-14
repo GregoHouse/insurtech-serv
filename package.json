@@ -4,12 +4,8 @@
   "description": "insurtech backend",
   "main": "src/index.js",
   "scripts": {
-    "dynamodb:create-table": "aws dynamodb create-table --table-name checkout-config-api --attribute-definitions AttributeName=PK,AttributeType=S AttributeName=SK,AttributeType=S --key-schema AttributeName=PK,KeyType=HASH AttributeName=SK,KeyType=RANGE --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 --endpoint-url http://localhost:8000>/dev/null && echo 'La tabla Configurations se creó correctamente'",
-    "dynamodb:pull": "docker pull amazon/dynamodb-local:1.21.0",
-    "dynamodb:initialize": "docker run -d -p 8000:8000 --name dynamodb-container amazon/dynamodb-local:1.21.0 -jar DynamoDBLocal.jar -sharedDb || true && echo 'El servicio DynamoDB está escuchando en http://localhost:8000'",
-    "dynamodb:start": "docker inspect dynamodb-container > /dev/null 2>&1 || (npm run dynamodb:pull && npm run dynamodb:initialize && npm run dynamodb:create-table); docker start dynamodb-container || true && echo 'El servicio DynamoDB está escuchando en http://localhost:8000'",
-    //"dev": "IS_OFFLINE=true npm run dynamodb:start && serverless offline",
-    "dev": "serverless offline start -s dev"
+    "dynamodb:start": "./.local-infra/dynamo-db.sh",
+    "dev": "IS_OFFLINE=true npm run dynamodb:start && serverless offline start -s dev"
   },
   "keywords": [],
   "author": "",

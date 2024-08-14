@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "dynamodb:start": "./.local-infra/dynamo-db.sh",
-    "dev": "IS_OFFLINE=true npm run dynamodb:start && serverless offline start -s dev"
+    "dev": "IS_OFFLINE=true npm run dynamodb:start && serverless offline start -s develop"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +21,6 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.622.0"
+    "dynamoose": "^4.0.1"
   }
 }

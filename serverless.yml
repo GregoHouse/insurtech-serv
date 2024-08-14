@@ -8,7 +8,7 @@ plugins:
 custom:
   serverless-dynamodb:
     stages:
-      - dev
+      - develop
     start:
       host: localhost
       port: 8000
@@ -36,7 +36,7 @@ provider:
   stage: ${opt:stage}
   timeout: 30
   environment:
-    STAGE: ${self:provider.stage}
+    NODE_ENV: ${self:provider.stage}
     USERS_TABLE_NAME: users
 
 package:

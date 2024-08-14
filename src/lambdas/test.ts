@@ -4,26 +4,42 @@ import type {
   APIGatewayProxyEventV2,
   Handler,
 } from 'aws-lambda'
-import { DynamoDBClient, ListTablesCommand } from '@aws-sdk/client-dynamodb';
+import * as dynamoose from 'dynamoose'
 
-const client = new DynamoDBClient({
-  region: 'localhost',
-  endpoint: 'http://0.0.0.0:8000',
-  credentials: {
-    accessKeyId: 'MockAccessKeyId',
-    secretAccessKey: 'MockSecretAccessKey'
+if (process.env.NODE_ENV === 'develop') {
+  dynamoose.aws.ddb.local()
+} else {
+  const ddb = new dynamoose.aws.ddb.DynamoDB({ region: 'us-east-1' })
+  dynamoose.aws.ddb.set(ddb)
+}
+
+const schema = new dynamoose.Schema(
+  {
+    userId: {
+      type: String,
+      hashKey: true,
+    },
+    email: {
+      type: String,
+    },
   },
+  {
+    timestamps: true,
+  }
+)
+
+const UsersModel = dynamoose.model(process.env.USERS_TABLE_NAME!, schema, {
+  update: false,
+  create: false,
 })
 
 export const handler: Handler = async (
   _event: APIGatewayProxyEventV2,
   _context: Context
 ): Promise<APIGatewayProxyStructuredResultV2> => {
-  const command = new ListTablesCommand({});
+  const body = JSON.parse(_event.body as string)
 
-  const response = await client.send(command);
+  const user = await UsersModel.create(body)
 
-  console.log(response)
-  
-  return { statusCode: 200, body: JSON.stringify({ message: 'Success' }) }
+  return { statusCode: 200, body: JSON.stringify(user) }
 }

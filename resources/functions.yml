@@ -3,4 +3,4 @@ test:
   events:
     - httpApi:
         path: /api/test
-        method: GET
+        method: POST
